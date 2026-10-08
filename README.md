@@ -6,7 +6,8 @@ A small command-line toolkit for everyday cryptography tasks, built with
 - **Hashing**: hash text or files, and compare them against a known hash or another file.
 - **RSA**: generate key pairs and encrypt messages with a public key.
 
-> ![WARNING] This is a learning/utility project. It has not been security audited, and
+> [!WARNING] 
+> This is a learning/utility project. It has not been security audited, and
 > private keys are written to disk **unencrypted**. See [Known issues](#known-issues).
 
 ## Requirements
@@ -28,7 +29,8 @@ Then run the CLI with:
 uv run python app.py --help
 ```
 
-> **Note:** `pyproject.toml` lists `windows-curses`, which only installs on
+> [!Note]
+> `pyproject.toml` lists `windows-curses`, which only installs on
 > Windows. Nothing in the code imports it, so on macOS/Linux you may need to
 > remove it from `dependencies` before `uv sync` succeeds.
 
