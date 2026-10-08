@@ -6,11 +6,8 @@ A small command-line toolkit for everyday cryptography tasks, built with
 - **Hashing**: hash text or files, and compare them against a known hash or another file.
 - **RSA**: generate key pairs and encrypt messages with a public key.
 
-<<<<<<< HEAD
-> [!WARNING]
-=======
+
 > [!WARNING] 
->>>>>>> 9b2dc23f67a2e17766b219bc8f54ddd7fefdef39
 > This is a learning/utility project. It has not been security audited, and
 > private keys are written to disk **unencrypted**. See [Known issues](#known-issues).
 
@@ -33,14 +30,6 @@ Then run the CLI with:
 uv run python app.py --help
 ```
 
-<<<<<<< HEAD
-=======
-> [!Note]
-> `pyproject.toml` lists `windows-curses`, which only installs on
-> Windows. Nothing in the code imports it, so on macOS/Linux you may need to
-> remove it from `dependencies` before `uv sync` succeeds.
-
->>>>>>> 9b2dc23f67a2e17766b219bc8f54ddd7fefdef39
 ## Usage
 
 The CLI has two command groups: `hashing` and `rsa`.
@@ -161,17 +150,22 @@ py-crypto/
 
 1. **Private keys are unencrypted.** `new-private` always uses `NoEncryption()`,
    so `private.pem` is stored in plain text. Protect it accordingly and never commit it.
+   
 2. **Output files overwrite silently.** `private.pem` and `public.pem` are
    always written to the current directory and replace existing files.
+   
 3. **Unsupported key options leave an empty `private.pem`.** The file is opened
    before the key is serialized, so an unsupported `--encoding` /
    `--private-format` combination crashes with a `ValueError` after
    truncating any existing `private.pem`. Back up your key first.
+   
 4. **`rsa new-pub` without a path crashes** with a `TypeError` instead of
    showing a friendly error.
+   
 5. **Repeated panel rows.** `success()`/`fail()` share one module-level table
    that is never cleared; fine for a single CLI run, but rows would pile up if
    called multiple times in one process.
+   
 6. **`md5` and `sha1`** are included but are not collision-resistant. Don't rely
    on them for security.
 
