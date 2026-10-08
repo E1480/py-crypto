@@ -6,7 +6,8 @@ A small command-line toolkit for everyday cryptography tasks, built with
 - **Hashing**: hash text or files, and compare them against a known hash or another file.
 - **RSA**: generate key pairs and encrypt messages with a public key.
 
-> ![WARNING] This is a learning/utility project. It has not been security audited, and
+> [!WARNING]
+> This is a learning/utility project. It has not been security audited, and
 > private keys are written to disk **unencrypted**. See [Known issues](#known-issues).
 
 ## Requirements
@@ -28,13 +29,17 @@ Then run the CLI with:
 uv run python app.py --help
 ```
 
-> **Note:** `pyproject.toml` lists `windows-curses`, which only installs on
-> Windows. Nothing in the code imports it, so on macOS/Linux you may need to
-> remove it from `dependencies` before `uv sync` succeeds.
-
 ## Usage
 
 The CLI has two command groups: `hashing` and `rsa`.
+
+Every command has built-in help describing its arguments and options:
+
+```bash
+uv run python app.py --help                  # list the command groups
+uv run python app.py hashing --help          # list the hashing commands
+uv run python app.py hashing compare --help  # help for a single command
+```
 
 ### Hashing
 
@@ -58,13 +63,16 @@ Provide either text or `--file`, not both.
 
 **Compare against a known hash**
 
-`compare` accepts file paths or plain text for either argument:
+`compare` takes the thing to hash first and what to compare it to second:
 
-| First argument | Second argument | What happens                                   |
-| -------------- | --------------- | ---------------------------------------------- |
-| file           | file            | Both files are hashed and compared             |
-| file           | text            | File is hashed and compared to the given digest |
-| text           | text            | First value is hashed and compared to the second |
+| First argument | Second argument | What happens                                       |
+| -------------- | --------------- | -------------------------------------------------- |
+| file path      | file path       | Both files are hashed and compared                 |
+| file path      | hex digest      | The file is hashed and compared to the digest      |
+| text           | hex digest      | The text is hashed and compared to the digest      |
+
+The order matters. Putting the digest first and a file second is treated as
+text vs text and reports a mismatch.
 
 ```bash
 uv run python app.py hashing compare ./download.iso <expected-sha256-digest>
@@ -90,10 +98,12 @@ uv run python app.py rsa new-private --key-size 4096
 | `--public-exponent`| 65537   | any int                                           |
 | `--key-size`       | 3072    | any valid RSA size in bits                        |
 | `--encoding`       | `pem`   | `pem`, `der`, `openssh`, `raw`, `x962`, `smime`   |
-| `--private-format` | `pkcs8` | `pkcs8`, `pkc12`, `traditional`, `raw`            |
+| `--private-format` | `pkcs8` | `pkcs8`, `pkcs12`, `traditional`, `raw`           |
 
-Only `pem` encoding with `pkcs8` or `traditional` format is expected to
-produce a usable key for the other commands, since they load PEM files.
+For RSA keys only `pem` or `der` encoding combined with `pkcs8` or
+`traditional` format works. Every other combination fails with a `ValueError`
+(see [Known issues](#known-issues)). `new-pub` and `encrypt` read PEM files,
+so use the default `pem` encoding if you want to continue with those commands.
 
 **2. Derive the public key** (writes `public.pem`)
 
@@ -119,9 +129,9 @@ py-crypto/
 ├── app.py              # CLI entry point (Typer app: `hashing` and `rsa` groups)
 ├── modules/
 │   ├── __init__.py     # Rich console output helpers: success() / fail()
-│   ├── hash.py         # Text/file hashing and comparison
+│   ├── hash.py         # Text/file hashing and comparison functions
 │   ├── rsa.py          # RSA key generation and encryption
-│   └── typings.py      # CLI choice enums and cryptography constant lookups
+│   └── typings.py      # Hash/encoding/format enums and their lookup tables
 ├── pyproject.toml      # Project metadata and dependencies
 ├── uv.lock             # Locked dependency versions
 └── .python-version     # Python version used for development (3.13)
@@ -131,11 +141,9 @@ py-crypto/
 
 | Package        | Purpose                                         |
 | -------------- | ----------------------------------------------- |
-| `typer`        | CLI framework                                   |
+| `typer`        | CLI framework and `--help` output               |
 | `rich`         | Formatted terminal output                       |
 | `cryptography` | RSA key generation, serialization, and OAEP     |
-| `bcrypt`       | Declared but not currently used in the code     |
-| `windows-curses` | Declared but not currently used (Windows only) |
 
 ## Known issues
 
@@ -143,12 +151,18 @@ py-crypto/
    so `private.pem` is stored in plain text. Protect it accordingly and never commit it.
 2. **Output files overwrite silently.** `private.pem` and `public.pem` are
    always written to the current directory and replace existing files.
-3. **Repeated panel rows.** `success()`/`fail()` share one module-level table
+3. **Unsupported key options leave an empty `private.pem`.** The file is opened
+   before the key is serialized, so an unsupported `--encoding` /
+   `--private-format` combination crashes with a `ValueError` after
+   truncating any existing `private.pem`. Back up your key first.
+4. **`rsa new-pub` without a path crashes** with a `TypeError` instead of
+   showing a friendly error.
+5. **Repeated panel rows.** `success()`/`fail()` share one module-level table
    that is never cleared; fine for a single CLI run, but rows would pile up if
    called multiple times in one process.
-4. **`md5` and `sha1`** are included but are not collision-resistant. Don't rely
+6. **`md5` and `sha1`** are included but are not collision-resistant. Don't rely
    on them for security.
 
 ## License
 
-No license has been specified yet.
+This project is licensed under the [MIT License](LICENSE).
