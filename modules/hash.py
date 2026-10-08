@@ -1,25 +1,6 @@
-import hashlib
-from enum import Enum
 from pathlib import Path
 
-
-class HashAlgorithm(Enum):
-    MD5 = "md5"
-    SHA1 = "sha1"
-    SHA256 = "sha256"
-    SHA512 = "sha512"
-    BLAKE2B = "blake2b"
-    BLAKE2S = "blake2s"
-
-
-HASHES = {
-    HashAlgorithm.MD5: hashlib.md5,
-    HashAlgorithm.SHA1: hashlib.sha1,
-    HashAlgorithm.SHA256: hashlib.sha256,
-    HashAlgorithm.SHA512: hashlib.sha512,
-    HashAlgorithm.BLAKE2B: hashlib.blake2b,
-    HashAlgorithm.BLAKE2S: hashlib.blake2s,
-}
+from .typings import HASHES, HashAlgorithm
 
 
 def _(name: HashAlgorithm = HashAlgorithm.SHA256):
@@ -37,8 +18,8 @@ def file(path: Path, algo: HashAlgorithm) -> str:
             chunk = f.read(1024)
             if chunk == b"":
                 break
+            func.update(chunk)
 
-        func.update(chunk)
     return func.hexdigest()
 
 def text_compare(string: str, hash: str, algo: HashAlgorithm) -> bool:

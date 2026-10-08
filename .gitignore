@@ -12,3 +12,5 @@ wheels/
 
 # RSA keys
 *.pem
+
+documented/
