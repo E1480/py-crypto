@@ -121,7 +121,8 @@ uv run python app.py rsa encrypt "secret message" public.pem
 Prints the ciphertext as a hex string. Encryption uses RSA-OAEP with SHA-256.
 RSA can only encrypt short messages (at most 318 bytes for a 3072-bit key).
 
-> There is currently no `decrypt` command.
+> [!NOTE]
+> There is currently no `decrypt` command.   :)
 
 ## Project structure
 
